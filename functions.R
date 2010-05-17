@@ -101,7 +101,7 @@ fde <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
 fde.log <- function(s, k, r, t, sd,
                     n = ceiling(1e3*t), m = 2*ceiling(sqrt(3*n)),
                     type = c("call", "put"), style = c("european", "american"),
-                    grid = FALSE, optim = TRUE) {
+                    grid = FALSE) {
   if (t <= 0) stop("t = ", t, " is nonpositive!")
   if (!is.wholenumber(n) || n <= 0) stop("n = ",n," is not a positive integer!")
   if (!is.wholenumber(m) || m <= 0) stop("m = ",m," is not a positive integer!")
@@ -122,11 +122,8 @@ fde.log <- function(s, k, r, t, sd,
   b <- (1 + r*dt)^-1 * (1 - dt/dz^2*sd^2)
   c <- (1 + r*dt)^-1 * (dt/(2*dz)*(r - 1/2*sd^2) + dt/(2*dz^2)*sd^2)
   for (i in g2m((n-1):0)) {             # Iterate from end to beginning.
-    if (optim) {
-      j.seq <- rep(g2m(0:2), times=m-1) + rep(0:(m-2), each=3)
-      f[i,g2m(1:(m-1))] <- matrix(f[i+1,j.seq], ncol=3, byrow=TRUE) %*% c(a,b,c)
-    }
-    else for (j in g2m((m-1):1)) f[i,j] <- t(c(a,b,c)) %*% f[i+1,(j-1):(j+1)]
+    j.seq <- rep(g2m(0:2), times=m-1) + rep(0:(m-2), each=3)
+    f[i,g2m(1:(m-1))] <- matrix(f[i+1,j.seq], ncol=3, byrow=TRUE) %*% c(a,b,c)
 
     if (type == 'call') {               # m: ∂C/∂S ≈ 1
       f[i,g2m(m)] <- f[i,g2m(m-1)] + exp(z.seq[g2m(m)]) - exp(z.seq[g2m(m-1)])
