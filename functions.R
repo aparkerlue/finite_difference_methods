@@ -4,7 +4,7 @@
 
 ## All arguments are scalar.
 fde <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
-                type = c("call", "put")) {
+                type = c("call", "put"), optim = TRUE) {
   is.wholenumber <-
     function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
   if (!is.wholenumber(n) || n <= 0) stop("n = ", n, " is not a positive integer!")
@@ -38,8 +38,13 @@ fde <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
   b <- (1 + r*dt)^-1 * (1 - dt/dz^2*sd^2)
   c <- (1 + r*dt)^-1 * (dt/(2*dz)*(r - 1/2*sd^2) + dt/(2*dz^2)*sd^2)
   for (i in g2m((n-1):0)) {
-    for (j in g2m((m-1):1))
-      f[i,j] <- t(c(a,b,c)) %*% f[i+1,(j-1):(j+1)]
+    if (optim) {
+      f.next <- matrix(f[i+1,rep(g2m(0:2),m-1)+rep(0:(m-2),each=3)],ncol=3,byrow=T)
+      f[i,g2m(1:(m-1))] <- f.next %*% c(a,b,c)
+    }
+    else
+      for (j in g2m((m-1):1))
+        f[i,j] <- t(c(a,b,c)) %*% f[i+1,(j-1):(j+1)]
     f[i,g2m(m)] = f[i,g2m(m-1)] + exp(z[g2m(m)]) - exp(z[g2m(m-1)])
     f[i,g2m(0)] = f[i,g2m(1)]           # ∂C/∂S ≈ 0
   }
