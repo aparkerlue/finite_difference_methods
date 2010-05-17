@@ -10,12 +10,15 @@ dx <- sd*sqrt(4*dt)
 
 n <- t / dt
 m <- round(log(s) / dx)
-fde(k, r, sd, t, n, s, m)
+fde(s, k, r, t, sd, n, m)
 
 ##
-s <- 50
-k <- 50
-r <- 0.10
-sd <- 0.40
-t <- 5/12
-fde(s, k, r, t, sd)
+
+s <- 41
+k <- 40
+r <- 0.08
+sd <- 0.30
+t <- 3/12
+
+bsm.option(s, k, r, t, sd, type='call')
+fde(s, k, r, t, sd, type='call')
