@@ -8,6 +8,14 @@ s <- 10
 dt <- 0.002
 dx <- sd*sqrt(4*dt)
 
-m <- log(s) / dx
 n <- t / dt
+m <- round(log(s) / dx)
 fde(k, r, sd, t, n, s, m)
+
+##
+s <- 50
+k <- 50
+r <- 0.10
+sd <- 0.40
+t <- 5/12
+fde(s, k, r, t, sd)
