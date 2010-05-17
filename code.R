@@ -14,11 +14,11 @@ fde(s, k, r, t, sd, n, m)
 
 ##
 
-s <- 41
-k <- 40
-r <- 0.08
-sd <- 0.30
-t <- 3/12
+s <- 50
+k <- 50
+r <- 0.10
+sd <- 0.40
+t <- 5/12
 
 bsm.option(s, k, r, t, sd, type='call')
-fde(s, k, r, t, sd, type='call')
+fde.s(s, k, r, t, sd, n=10, m=20, type='put', style='american')
