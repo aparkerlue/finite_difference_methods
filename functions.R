@@ -3,7 +3,8 @@
 ######################################################################
 
 fde <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
-                type = c("call", "put"), style = c("european", "american")) {
+                type = c("call", "put"), style = c("european", "american"),
+                grid = FALSE) {
   if (t <= 0) stop("t = ", t, " is nonpositive!")
   is.wholenumber <-
     function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
@@ -47,7 +48,10 @@ fde <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
     }
   }
 
-  f[g2m(0), g2m(m/2)]
+  if (grid)
+    return(f)
+  else
+    return(f[g2m(0), g2m(m/2)])
 }
 
 fde.log <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),

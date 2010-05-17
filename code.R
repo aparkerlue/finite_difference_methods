@@ -1,4 +1,5 @@
 source('functions.R')
+source('util.R')
 
 k <- 10
 r <- 0.04
@@ -20,5 +21,8 @@ with(optionrc, {
   p.bsm <- bsm.option(s=s, k=k, r=r, t=t, sd=sd, type=type)
   p.fde <- fde(s=s, k=k, r=r, t=t, sd=sd, n=10, m=20, type=type, style=style)
   cat('bsm = ', p.bsm, '\n', sep="")
-  cat('fde = ', p.fde, '\n', sep="")
+  cat('fde =\n')
+  print(p.fde)
 })
+with(optionrc, fde(s, k, r, t, sd, n=10, m=20, type=type, style=style))
+rotate(with(optionrc, fde(s,k,r,t,sd,n=10,m=20,type,style,grid=T)), digits=2)
