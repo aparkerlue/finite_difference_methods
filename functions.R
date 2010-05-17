@@ -98,7 +98,8 @@ fde <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
   if (grid) return(f) else return(f[g2m(0), g2m(m/2)])
 }
 
-fde.log <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
+fde.log <- function(s, k, r, t, sd,
+                    n = ceiling(1e3*t), m = 2*ceiling(sqrt(3*n)),
                     type = c("call", "put"), style = c("european", "american"),
                     grid = FALSE, optim = TRUE) {
   if (t <= 0) stop("t = ", t, " is nonpositive!")
@@ -109,7 +110,7 @@ fde.log <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
   dt <- t / n
   m <- m + m%%2                         # Ensure m is even.
   ## Set stock price limits to +/- 3 standard deviations.
-  z.lim <- log(s) + (r-1/2*sd^2)*t + c(max=sd*3*sqrt(t), min=-sd*3*sqrt(t))
+  z.lim <- log(s) + 3*sd*sqrt(t)*c(max=1, min=-1)
   dz <- unname(z.lim['max'] - z.lim['min']) / m
   z.seq <- z.lim['min'] + 0:m*dz        # vector, m+1 elements
 
@@ -125,9 +126,7 @@ fde.log <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
       j.seq <- rep(g2m(0:2), times=m-1) + rep(0:(m-2), each=3)
       f[i,g2m(1:(m-1))] <- matrix(f[i+1,j.seq], ncol=3, byrow=TRUE) %*% c(a,b,c)
     }
-    else
-      for (j in g2m((m-1):1))
-        f[i,j] <- t(c(a,b,c)) %*% f[i+1,(j-1):(j+1)]
+    else for (j in g2m((m-1):1)) f[i,j] <- t(c(a,b,c)) %*% f[i+1,(j-1):(j+1)]
 
     if (type == 'call') {               # m: ∂C/∂S ≈ 1
       f[i,g2m(m)] <- f[i,g2m(m-1)] + exp(z.seq[g2m(m)]) - exp(z.seq[g2m(m-1)])
