@@ -13,8 +13,11 @@ dt <- .002
 dx <- c(sd*sqrt(dt), sd*sqrt(3*dt), sd*sqrt(4*dt))
 type <- 'put'; style <- 'european'
 
-## Black-Scholes-Merton for comparison
-bsm.option(s, k, r, t, sd, type)
+## Binomial or Black-Scholes-Merton for comparison
+if (type == 'put' && style == 'american') {
+  binom.american.put(s, k, r, t, sd, n=1e3)
+} else
+  bsm.option(s, k, r, t, sd, type)
 
 ## Regular implementation.
 fde.log(s, k, r, t, sd, type=type, style=style)
@@ -53,7 +56,7 @@ ds <- c(0.5, 1, 1.5)
 type <- 'put'; style <- 'american'
 
 ## Binomial or Black-Scholes-Merton for comparison
-if (type == 'put') {
+if (type == 'put' && style == 'american') {
   binom.american.put(s, k, r, t, sd, n=1e3)
 } else
   bsm.option(s, k, r, t, sd, type)
