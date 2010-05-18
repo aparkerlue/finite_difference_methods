@@ -1,0 +1,11 @@
+2010-05-17
+
+Finite difference methods!
+
+	* implicit finite difference method
+
+	* explicit finite difference method
+
+	* Crank-Nicolson scheme
+
+Written in R.
