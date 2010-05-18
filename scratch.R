@@ -61,15 +61,15 @@ with(optrc, fde.log(s, k, r, t, sd, type=type, style=style))
 
 ## Crank-Nicolson scheme, using log transform.
 ##
-## American put yields $4.25, but it should be around $4.28.
+## American put yields $4.21, but it should be around $4.28.
 with(optrc, {
   grid.a <- rotate(fdcn.log(s, k, r, t, sd, n=10, m=20, type, style, grid=T), 2)
   price.a <- fdcn.log(s, k, r, t, sd, n=10, m=20, type, style)
   print(grid.a)
   cat('American put:', round(price.a, 2), '\n')
 })
-## Using programmed default values for n and m, computation yields
-## $4.31, still a bit far from the correct value of $4.28.
+## Using programmed default values for n and m, computation converges
+## to correct value of $4.28.
 with(optrc, fdcn.log(s, k, r, t, sd, type=type, style=style))
 
 ######################################################################

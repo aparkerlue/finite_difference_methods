@@ -193,6 +193,13 @@ fde.log <- function(s, k, r, t, sd,
 ## Crank-Nicolson Scheme                                            ##
 ######################################################################
 
+fdcn <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(3*n)),
+                 type = c("call", "put"), style = c("european", "american"),
+                 grid = FALSE) {
+  ## FIXME: We don't yet have a non-log-transform implementation.
+  fdcn.log(s, k, r, t, sd, n, m, type, style, grid)
+}
+
 fdcn.log <- function(s, k, r, t, sd,
                     n = ceiling(1e3*t), m = 2*ceiling(sqrt(3*n)),
                     type = c("call", "put"), style = c("european", "american"),
@@ -212,10 +219,7 @@ fdcn.log <- function(s, k, r, t, sd,
   f <- matrix(rep(NA, (n+1)*(m+1)), nrow=n+1)
   g2m <- function(i)  i + 1             # grid index to matrix index
   f[g2m(n),] = switch(type, call=pmax(exp(z.seq)-k,0), put=pmax(k-exp(z.seq),0))
-  f[,g2m(m)] = switch(type, call=exp(z.seq[g2m(m)])-k, put=0)
-  f[,g2m(0)] = switch(type, call=0,                    put=k-exp(z.seq[g2m(0)]))
 
-  a <- dt/dz^2
   p.u <- -dt/4*(sd^2/dz^2 + (r - 1/2*sd^2)/dz)
   p.m <- 1 + dt*(sd^2/(2*dz^2) + r/2)
   p.d <- -dt/4*(sd^2/dz^2 - (r - 1/2*sd^2)/dz)
@@ -223,11 +227,17 @@ fdcn.log <- function(s, k, r, t, sd,
     diag(c(1, rep(p.m, m-1), -1)) +
       rbind(cbind(0, diag(c(-1, rep(p.d, m-1)))), 0)
   c <- tridiag
-  d <- diag(2, m+1) - tridiag           # Note: 1st and last rows corrected later.
+  d <- diag(2, m+1) - tridiag           # Note: 1st & last rows corrected later.
   for (i in g2m((n-1):0)) {             # Iterate from end to beginning.
     rhs <- d %*% f[i+1,g2m(m:0)]
-    rhs[g2m(0)] <- exp(z.seq[g2m(m)]) - exp(z.seq[g2m(m-1)])
-    rhs[g2m(m)] <- 0
+    if (type == 'call') {
+      rhs[g2m(0)] <- exp(z.seq[g2m(m)]) - exp(z.seq[g2m(m-1)])
+      rhs[g2m(m)] <- 0
+    }
+    else if (type == 'put') {
+      rhs[g2m(0)] <- 0
+      rhs[g2m(m)] <- exp(z.seq[g2m(m)]) - exp(z.seq[g2m(m-1)])
+    }
     f[i,g2m(m:0)] <- solve(c, rhs)
     
     if (type == 'put' && style == 'american')

@@ -1,7 +1,7 @@
 source('functions.R')
 
 ######################################################################
-## Problem 1                                                        ##
+## European put                                                     ##
 ######################################################################
 
 s <- 10
@@ -24,7 +24,7 @@ fde.log(s, k, r, t, sd, type=type, style=style)
 fdi.log(s, k, r, t, sd, type=type, style=style)
 fdcn.log(s, k, r, t, sd, type=type, style=style)
 
-## Project requirements.
+## Convergence demonstration.
 n <- round(t/dt)
 m <- round(6*sd*sqrt(t)/dx[1])          # dx = sd*sqrt(dt)
 fde.log(s, k, r, t, sd, n, m, type, style)
@@ -43,7 +43,7 @@ fdcn.log(s, k, r, t, sd, n, m, type, style)
 
 
 ######################################################################
-## Problem 2                                                        ##
+## American put                                                     ##
 ######################################################################
 
 s <- 10
@@ -64,17 +64,21 @@ if (type == 'put' && style == 'american') {
 ## Regular implementation.
 fde(s, k, r, t, sd, type=type, style=style)
 fdi(s, k, r, t, sd, type=type, style=style)
+fdcn(s, k, r, t, sd, type=type, style=style)
 
-## Project requirements.
+## Convergence demonstration.
 n <- round(t/dt)
 m <- round(2*s/ds[1])                   # ds = 0.5
 fde(s, k, r, t, sd, n, m, type, style)
 fdi(s, k, r, t, sd, n, m, type, style)
+fdcn(s, k, r, t, sd, n, m, type, style)
 
 m <- round(2*s/ds[2])                   # ds = 1
 fde(s, k, r, t, sd, n, m, type, style)
 fdi(s, k, r, t, sd, n, m, type, style)
+fdcn(s, k, r, t, sd, n, m, type, style)
 
 m <- round(2*s/ds[3])                   # ds = 1.5
 fde(s, k, r, t, sd, n, m, type, style)
 fdi(s, k, r, t, sd, n, m, type, style)
+fdcn(s, k, r, t, sd, n, m, type, style)
