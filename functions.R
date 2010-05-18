@@ -216,10 +216,10 @@ fdcn.log <- function(s, k, r, t, sd,
   f[,g2m(0)] = switch(type, call=0,                    put=k-exp(z.seq[g2m(0)]))
 
   a <- dt/dz^2
-  e <- diag(sd^2*a/2, m-1) - rbind(cbind(0, diag(sd^2*a/4, m-2)), 0) -
+  tridiag <- diag(sd^2*a/2, m-1) - rbind(cbind(0, diag(sd^2*a/4, m-2)), 0) -
     rbind(0, cbind(diag(sd^2*a/4, m-2), 0))
-  c <- diag(1, m-1) + e
-  d <- diag(1, m-1) - e
+  c <- diag(1, m-1) + tridiag
+  d <- diag(1, m-1) - tridiag
   for (i in g2m((n-1):0)) {             # Iterate from end to beginning.
     b <- c(sum(f[i:(i+1),g2m(0)])/2, rep(0, m-3), sum(f[i:(i+1),g2m(m)])/2)
     rhs <- d %*% f[i+1,g2m(1:(m-1))] + sd^2*a/2*b
