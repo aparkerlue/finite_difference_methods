@@ -19,6 +19,7 @@ bsm.option(s, k, r, t, sd, type)
 ## Regular implementation.
 fde.log(s, k, r, t, sd, type=type, style=style)
 fdi.log(s, k, r, t, sd, type=type, style=style)
+fdcn.log(s, k, r, t, sd, type=type, style=style)
 
 ## Project requirements.
 n <- round(t/dt)

@@ -4,7 +4,7 @@ source('util.R')
 ## Implicit Finite Difference Method                                ##
 ######################################################################
 
-fdi <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
+fdi <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(3*n)),
                 type = c("call", "put"), style = c("european", "american"),
                 grid = FALSE) {
   if (t <= 0) stop("t = ", t, " is nonpositive!")
@@ -105,7 +105,7 @@ fdi.log <- function(s, k, r, t, sd,
 ## Explicit Finite Difference Method                                ##
 ######################################################################
 
-fde <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(n)),
+fde <- function(s, k, r, t, sd, n = ceiling(1e3*t), m = 2*ceiling(sqrt(3*n)),
                 type = c("call", "put"), style = c("european", "american"),
                 grid = FALSE) {
   if (t <= 0) stop("t = ", t, " is nonpositive!")
@@ -184,6 +184,49 @@ fde.log <- function(s, k, r, t, sd,
       if (style == 'american')
         f[i,] <- pmax(f[i,], k - exp(z.seq))
     }
+  }
+
+  if (grid) return(f) else return(f[g2m(0), g2m(m/2)])
+}
+
+######################################################################
+## Crank-Nicolson Scheme                                            ##
+######################################################################
+
+fdcn.log <- function(s, k, r, t, sd,
+                    n = ceiling(1e3*t), m = 2*ceiling(sqrt(3*n)),
+                    type = c("call", "put"), style = c("european", "american"),
+                    grid = FALSE) {
+  if (t <= 0) stop("t = ", t, " is nonpositive!")
+  if (!is.wholenumber(n) || n <= 0) stop("n = ",n," is not a positive integer!")
+  if (!is.wholenumber(m) || m <= 0) stop("m = ",m," is not a positive integer!")
+  type <- match.arg(type); style <- match.arg(style)
+
+  dt <- t / n
+  m <- m + m%%2                         # Ensure m is even.
+  ## Set stock price limits to +/- 3 standard deviations.
+  z.lim <- log(s) + 3*sd*sqrt(t)*c(min=-1, max=1)
+  dz <- unname(diff(z.lim)) / m
+  z.seq <- z.lim['min'] + 0:m*dz        # vector, m+1 elements
+
+  f <- matrix(rep(NA, (n+1)*(m+1)), nrow=n+1)
+  g2m <- function(i)  i + 1             # grid index to matrix index
+  f[g2m(n),] = switch(type, call=pmax(exp(z.seq)-k,0), put=pmax(k-exp(z.seq),0))
+  f[,g2m(m)] = switch(type, call=exp(z.seq[g2m(m)])-k, put=0)
+  f[,g2m(0)] = switch(type, call=0,                    put=k-exp(z.seq[g2m(0)]))
+
+  a <- dt/dz^2
+  e <- diag(sd^2*a/2, m-1) - rbind(cbind(0, diag(sd^2*a/4, m-2)), 0) -
+    rbind(0, cbind(diag(sd^2*a/4, m-2), 0))
+  c <- diag(1, m-1) + e
+  d <- diag(1, m-1) - e
+  for (i in g2m((n-1):0)) {             # Iterate from end to beginning.
+    b <- c(sum(f[i:(i+1),g2m(0)])/2, rep(0, m-3), sum(f[i:(i+1),g2m(m)])/2)
+    rhs <- d %*% f[i+1,g2m(1:(m-1))] + sd^2*a/2*b
+    f[i,g2m(1:(m-1))] <- solve(c, rhs)
+    
+    if (type == 'put' && style == 'american')
+      f[i,] <- pmax(f[i,], k - exp(z.seq))
   }
 
   if (grid) return(f) else return(f[g2m(0), g2m(m/2)])
