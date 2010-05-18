@@ -23,6 +23,19 @@ with(optrc, {
   cat('European put:', round(price.e, 2), '\n')
 })
 
+## Implicit finite difference method, using log transform.
+##
+## American put yields $4.11, but it should be around $4.28.
+with(optrc, {
+  grid.a <- rotate(fdi.log(s, k, r, t, sd, n=10, m=20, type, style, grid=T), 2)
+  price.a <- fdi.log(s, k, r, t, sd, n=10, m=20, type, style)
+  print(grid.a)
+  cat('American put:', round(price.a, 2), '\n')
+})
+## Using programmed default values for n and m, computation converges
+## to correct value of $4.28.
+with(optrc, fdi.log(s, k, r, t, sd, type=type, style=style))
+
 ## Explicit finite difference method.
 ##
 ## American put yields $4.26.
@@ -42,7 +55,8 @@ with(optrc, {
   print(grid.a)
   cat('American put:', round(price.a, 2), '\n')
 })
-## Using default values for n and m, result converges to $4.28.
+## Using programmed default values for n and m, computation converges
+## to correct value of $4.28.
 with(optrc, fde.log(s, k, r, t, sd, type=type, style=style))
 
 ######################################################################
