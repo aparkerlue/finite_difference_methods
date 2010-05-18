@@ -216,14 +216,19 @@ fdcn.log <- function(s, k, r, t, sd,
   f[,g2m(0)] = switch(type, call=0,                    put=k-exp(z.seq[g2m(0)]))
 
   a <- dt/dz^2
-  tridiag <- diag(sd^2*a/2, m-1) - rbind(cbind(0, diag(sd^2*a/4, m-2)), 0) -
-    rbind(0, cbind(diag(sd^2*a/4, m-2), 0))
-  c <- diag(1, m-1) + tridiag
-  d <- diag(1, m-1) - tridiag
+  p.u <- -dt/4*(sd^2/dz^2 + (r - 1/2*sd^2)/dz)
+  p.m <- 1 + dt*(sd^2/(2*dz^2) + r/2)
+  p.d <- -dt/4*(sd^2/dz^2 - (r - 1/2*sd^2)/dz)
+  tridiag <- rbind(0, cbind(diag(c(rep(p.u, m-1), 1)), 0)) +
+    diag(c(1, rep(p.m, m-1), -1)) +
+      rbind(cbind(0, diag(c(-1, rep(p.d, m-1)))), 0)
+  c <- tridiag
+  d <- diag(2, m+1) - tridiag           # Note: 1st and last rows corrected later.
   for (i in g2m((n-1):0)) {             # Iterate from end to beginning.
-    b <- c(sum(f[i:(i+1),g2m(0)])/2, rep(0, m-3), sum(f[i:(i+1),g2m(m)])/2)
-    rhs <- d %*% f[i+1,g2m(1:(m-1))] + sd^2*a/2*b
-    f[i,g2m(1:(m-1))] <- solve(c, rhs)
+    rhs <- d %*% f[i+1,g2m(m:0)]
+    rhs[g2m(0)] <- exp(z.seq[g2m(m)]) - exp(z.seq[g2m(m-1)])
+    rhs[g2m(m)] <- 0
+    f[i,g2m(m:0)] <- solve(c, rhs)
     
     if (type == 'put' && style == 'american')
       f[i,] <- pmax(f[i,], k - exp(z.seq))
